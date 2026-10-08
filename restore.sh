@@ -7,6 +7,9 @@ fi
 DIR="$1"
 MAL_DIR="$2"
 
+WHITELIST="whitelist.txt"
+touch "$WHITELIST"
+
 if [ -z "$(ls -A "$MAL_DIR")" ]; then
     echo "No malicious files to review."
     exit 0
@@ -36,11 +39,15 @@ while true; do
     echo "1) Restore  2) Delete permanently  3) Leave as is"
     read -p "Choice: " choice
     case "$choice" in
-        1) mv "$MAL_DIR/$file" "$DIR/$file"
-           echo "Restored $file to $DIR." ;;
+	1) mv "$MAL_DIR/$file" "$DIR/$file"
+	   grep -qxF "$file" "$WHITELIST" || echo "$file" >> "$WHITELIST"
+   	   echo "Restored $file to $DIR." ;;
+
         2) rm "$MAL_DIR/$file"
            echo "$file permanently deleted." ;;
+
         3) ;;   # do nothing, loop back to the list
+
         *) echo "Invalid choice." ;;
     esac
 done

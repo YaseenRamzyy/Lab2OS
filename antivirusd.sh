@@ -8,6 +8,10 @@ DIR="$1"
 MAL_DIR="$2"
 INTERVAL="$3"
 
+WHITELIST="whitelist.txt"
+
+touch "$WHITELIST"      # create it if it doesn't exist
+
 # ---- FLAGGED LISTS ----
 EXTENSIONS="exe bat vbs scr ps1"
 KEYWORDS="virus|trojan|malware|worm|ransomware"
@@ -44,6 +48,13 @@ scan() {
 	for path in "$DIR"/*; do
 		[ -f "$path" ] || continue
 		name=$(basename "$path")
+
+		# Skip files the user marked as safe
+
+        	if grep -qxF "$name" "$WHITELIST"; then
+            		continue
+        	fi
+
 		if is_malicious "$path"; then
 			echo "$name is malicious and it is DELETED"
 			cp "$path" "$MAL_DIR/$name"
